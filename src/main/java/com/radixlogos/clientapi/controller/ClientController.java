@@ -5,14 +5,11 @@ import com.radixlogos.clientapi.dto.ClientInsertDTO;
 import com.radixlogos.clientapi.service.ClientService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.support.ServletContextResource;
-import org.springframework.web.context.support.ServletContextResourcePatternResolver;
-import org.springframework.web.service.invoker.UriBuilderFactoryArgumentResolver;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.util.UriBuilder;
-import org.springframework.web.util.UriBuilderFactory;
 
 import java.net.URI;
 
@@ -22,8 +19,14 @@ public class ClientController {
     @Autowired
     private ClientService service;
 
+    @GetMapping
+    public ResponseEntity<Page<ClientDTO>> findAllClients(Pageable pageable){
+         Page<ClientDTO> response = service.findAllClients(pageable);
+        return ResponseEntity.ok().body(response);
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<ClientDTO> findClientById(@Valid @PathVariable Long id){
+    public ResponseEntity<ClientDTO> findClientById(@PathVariable Long id){
         var response = service.findClientById(id);
         return ResponseEntity.ok().body(response);
     }
@@ -36,5 +39,16 @@ public class ClientController {
                 .path("/{id}")
                 .buildAndExpand(response.id()).toUri();
         return ResponseEntity.created(uri).body(response);
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<ClientDTO> updateClient(@PathVariable Long id,@Valid @RequestBody ClientInsertDTO insertDTO){
+        var response = service.updateClient(id,insertDTO);
+        return ResponseEntity.ok().body(response);
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> deleteClient(@PathVariable Long id){
+        service.deleteClient(id);
+        return ResponseEntity.noContent().build();
     }
 }
